@@ -4,11 +4,12 @@ import LoginIcon from '@mui/icons-material/Login';
 import { signup } from '../api/user';
 import { setAuthToken } from "../api/localStorage";
 
-function SignupForm() {
+function SignupForm(props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPWD, setConfirmPWD] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+
+  const { setShowAlert } = props;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -17,20 +18,19 @@ function SignupForm() {
 
     try {
       const response = await signup(email, password);
+
       // Assuming the API response includes an accessToken
       if (response.accessToken) {
         setAuthToken(response.accessToken);
         setAuthToken(response.refreshToken);
         // Redirect the user or update the UI to reflect the successful signup/login
-        console.log('Signup successful, user logged in.');
-        
+        setShowAlert('success', 'Signup successful, user logged in.');
       } else {
-        console.error('Signup successful, but no access token received.');
-        setErrorMessage('Signup successful, but unable to log in automatically.');
+        setShowAlert('warning', 'Signup successful, but no access token received.');
       }
     } catch (error) {
       console.error('Signup failed:', error);
-      setErrorMessage(error.message || 'An error occurred during signup.');
+      setShowAlert('error', error.message || 'An error occurred during signup.');
     }
   }
 
