@@ -1,0 +1,8 @@
+.signupForm {
+  flex: 1;
+  display: flex;
+  width: 100%;
+  margin-top: -50px;
+  justify-content: center;
+  align-items: center;
+}

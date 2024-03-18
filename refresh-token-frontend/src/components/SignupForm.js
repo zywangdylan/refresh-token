@@ -9,7 +9,7 @@ function SignupForm() {
   const [password, setPassword] = useState('');
   const [confirmPWD, setConfirmPWD] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     console.table(email, password);
@@ -20,9 +20,10 @@ function SignupForm() {
       // Assuming the API response includes an accessToken
       if (response.accessToken) {
         setAuthToken(response.accessToken);
+        setAuthToken(response.refreshToken);
         // Redirect the user or update the UI to reflect the successful signup/login
         console.log('Signup successful, user logged in.');
-        // Redirect or update UI here
+        
       } else {
         console.error('Signup successful, but no access token received.');
         setErrorMessage('Signup successful, but unable to log in automatically.');
