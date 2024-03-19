@@ -15,7 +15,6 @@ function SignupForm(props) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.table(email, password);
     // Email & Password validation
 
     try {
@@ -40,7 +39,7 @@ function SignupForm(props) {
   return (
     <form className="form-layout" onSubmit={handleSubmit}>
       <h2 style={{"marginTop": "0"}}>Signup</h2>
-      <TextField required fullWidth label="Email" value={email} onInput={e => setEmail(e.target.value)}></TextField>
+      <TextField required fullWidth label="Email" type='email' value={email} onInput={e => setEmail(e.target.value)}></TextField>
       <TextField required fullWidth label="Password" value={password} onInput={e => setPassword(e.target.value)}></TextField>
       <TextField required fullWidth label="Re-enter Password" value={confirmPWD} onInput={e => setConfirmPWD(e.target.value)}></TextField>
       <div style={{'width': '100%', 'display': 'flex', 'flexDirection': 'column'}}>

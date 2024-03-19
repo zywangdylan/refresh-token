@@ -26,7 +26,7 @@ const Signup = () => {
 
   return (
     <div className="uni-form-layout">
-      <Box sx={{ width: '100%', display: 'fixed', top: 0}} >
+      <Box sx={{ width: '100%' }} >
         <Collapse in={open} sx={{ width: '100%' }}>
           <Alert
             severity={severityType}

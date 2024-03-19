@@ -1,12 +1,51 @@
-import * as React from "react";
-import { Card, CardActions, CardContent, Typography, Button, List, ListItem, ListItemText } from '@mui/material';
+import { useState } from "react";
+import {
+  Card,
+  CardActions,
+  CardContent,
+  Typography,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
+  TextField
+} from '@mui/material';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 
-function UserInfoCard(props) {
-  const { userInfo } = props;
+import { updateUser } from '../api/user'
 
-  if (!userInfo) {
-    return <div>Loading...</div>;
+function UserInfoCard(props) {
+  const { userInfo, setUserInfo } = props;
+  const [email, setEmail] = useState(userInfo.email);
+  const [username, setUsername] = useState(userInfo.username || '');
+  const [phone, setPhone] = useState(userInfo.phone || '');
+  const [bio, setBio] = useState(userInfo.bio || '');
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleSubmit = async(e) => {
+    e.preventDefault();
+    const updates = {
+      email,
+      username,
+      phone,
+      bio
+    }
+    const data = await updateUser(updates);
+    setUserInfo(data);
+    handleClose();
   }
 
   return (
@@ -40,10 +79,72 @@ function UserInfoCard(props) {
         </List>
       </CardContent>
       <CardActions>
-        <Button size="small">
+        <Button size="small" onClick={ handleClickOpen }>
           <EditOutlinedIcon style={{'marginRight': '4px'}}/>Edit
         </Button>
       </CardActions>
+      <Dialog
+        open={open}
+        PaperProps={{
+          component: 'form',
+          onSubmit: handleSubmit
+        }}
+      >
+        <DialogTitle>Update your profile</DialogTitle>
+        <DialogContent>
+          <DialogContentText style={{'marginBottom': '1rem'}}>
+            To update your profile, please fill out the boxes below.
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            name="username"
+            label="User Name"
+            fullWidth
+            value={username}
+            onInput={e => setUsername(e.target.value)}
+          />
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            name="email"
+            label="Email Address"
+            type="email"
+            fullWidth
+            value={email}
+            onInput={e => setEmail(e.target.value)}
+          />
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            name="phone"
+            label="Phone Number"
+            type="tel"
+            fullWidth
+            value={phone}
+            onInput={e => setPhone(e.target.value)}
+          />
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            name="bio"
+            label="Bio"
+            fullWidth
+            multiline
+            maxRows={4}
+            value={bio}
+            onInput={e => setBio(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button variant="contained" type="submit">Update</Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   )
 }

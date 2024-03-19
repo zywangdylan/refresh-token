@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Box, Collapse } from '@mui/material';
+import { Alert, Box, Collapse, Skeleton } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate } from "react-router-dom";
@@ -40,6 +40,14 @@ function Home() {
     fetchUserInfo();
   }, [navigate]);
 
+  if (!userInfo) {
+    return (
+      <div className="home-layout">
+        <h1>Loading...</h1>
+      </div>
+    )
+  }
+
   return (
     <>
       <Box sx={{ width: '100%' }} className="top-alert">
@@ -66,12 +74,12 @@ function Home() {
         </Collapse>
       </Box>
       <div className="home-layout">
-        <div style={{'marginLeft': '16%'}}>
-          <h1>Welcome, user123@gmail.com</h1>
+        <div style={{'marginLeft': '25%'}}>
+          <h1>Welcome, { userInfo.username ? userInfo.username : userInfo.email }</h1>
           <h3>This is the Home page</h3>
         </div>
         <div className="user-card-layout">
-          <UserInfoCard userInfo = {userInfo}/>
+          <UserInfoCard userInfo={userInfo} setUserInfo={setUserInfo}/>
         </div>
       </div>
     </>
