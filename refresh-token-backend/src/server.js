@@ -29,14 +29,11 @@ app.post('/api/signup', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({ email, password: hashedPassword });
 
-    // Save the new user to the database
-    await newUser.save();
-
     // Create an access token
     const accessToken = jwt.sign(
       { userId: newUser._id },
       JWT_SECRET,
-      { expiresIn: '15m' } // Expires in 15 minutes
+      { expiresIn: '1m' } // Expires in 15 minutes
     );
 
     // Create a refresh token
@@ -52,14 +49,14 @@ app.post('/api/signup', async (req, res) => {
     await newUser.save();
 
     // Return the tokens to the user
-    res.status(201).send({
+    res.status(201).json({
       message: "User created successfully",
       accessToken,
       refreshToken
     });
   } catch (error) {
     console.error(error);
-    res.status(400).send(error);
+    res.status(400).json(error);
   }
 });
 
@@ -72,7 +69,7 @@ app.post('/api/login', async (req, res) => {
     }
 
     // Access token
-    const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '15m' }); // Expires in 15 minutes
+    const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1m' }); // Expires in 15 minutes
     // Refresh token
     const refreshToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' }); // Expires in 7 days
 
@@ -102,49 +99,68 @@ app.post('/api/logout', async (req, res) => {
 
 app.post('/api/refresh', async (req, res) => {
   const { refreshToken } = req.body;
-  if (!refreshToken) return res.status(401).json({ message: "Refresh Token is required" });
+
+  if (!refreshToken) {
+    return res.status(401).json({ message: "Refresh Token is required" });
+  }
 
   try {
     const payload = jwt.verify(refreshToken, JWT_SECRET);
     const user = await User.findById(payload.userId);
-    // Verify if refreshToken is stored with user
-    if (!user || !user.refreshTokens.find(token => token.token === refreshToken)) {
+
+    if (!user) {
+      return res.status(403).json({ message: "User not found" });
+    }
+
+    // Find the index of the token that matches the incoming refreshToken
+    const tokenIndex = user.refreshTokens.findIndex(token => {
+      return token.token === refreshToken
+    });
+
+    if (tokenIndex === -1) { // Token not found
       return res.status(403).json({ message: "Refresh Token is not valid" });
     }
 
     // Issue a new access token
-    const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '15m' });
+    const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1m' });
 
-    // Issue a new refresh token and replace the old one
-    // Refresh token rotation policy
-    const refreshToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' }); // Expires in 7 days
+    // Issue a new refresh token
+    const newRefreshToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' }); // Expires in 7 days
 
-    // Save refreshToken with user
-    user.refreshTokens.push({ token: refreshToken });
+    // Replace the old refresh token with the new one at the same index
+    user.refreshTokens[tokenIndex] = { token: newRefreshToken };
 
-    res.status(200).json({ accessToken, refreshToken });
+    await user.save(); // Save the updated user document
+
+    res.status(200).json({ accessToken, refreshToken: newRefreshToken });
   } catch (error) {
-    res.status(403).json({ message: "Invalid Refresh Token" });
+    if (error instanceof jwt.TokenExpiredError) {
+      return res.status(403).json({ message: "Refresh Token has expired" });
+    } else {
+      console.error('Token Refresh Error:', error);
+      return res.status(403).json({ message: "Invalid Refresh Token" });
+    }
   }
 });
 
-// GET /api/userinfo - Get user info based on the provided JWT token
-app.get('/api/userinfo', authenticateToken, async (req, res) => {
+// GET /api/userInfo - Get user info based on the provided JWT token
+app.get('/api/userInfo', authenticateToken, async (req, res) => {
   try {
     // The user ID is attached to the request in the authenticateToken middleware
     const user = await User.findById(req.user.userId).select('-password -refreshTokens'); // Exclude sensitive info
     if (!user) {
-      return res.status(404).send('User not found');
+      return res.status(404).json({ message: 'user not found' });
     }
-    res.status(200).send(user);
+    console.log(user)
+    res.status(200).json(user);
   } catch (error) {
     console.error(error);
-    res.status(500).send('An error occurred while fetching user info');
+    res.status(500).json({ message: 'An error occurred while fetching user info' });
   }
 });
 
-// PUT /api/userinfo - Update user info based on the provided JWT token
-app.put('/api/userinfo', authenticateToken, async (req, res) => {
+// PUT /api/userInfo - Update user info based on the provided JWT token
+app.put('/api/userInfo', authenticateToken, async (req, res) => {
   const updates = req.body;
   const userId = req.user.userId;
 
@@ -159,10 +175,10 @@ app.put('/api/userinfo', authenticateToken, async (req, res) => {
       return res.status(404).send({ message: "User not found" });
     }
 
-    res.status(200).send(updatedUser);
+    res.status(200).json(updatedUser);
   } catch (error) {
     console.error(error);
-    res.status(400).send({ message: "Error updating user information" });
+    res.status(400).json({ message: "Error updating user information" });
   }
 });
 
