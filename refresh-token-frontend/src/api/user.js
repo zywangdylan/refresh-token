@@ -1,4 +1,4 @@
-import { getAuthToken } from './localStorage'
+import { getAuthToken } from '../utils/localStorage'
 const API_BASE_URL = 'http://localhost:8080'
 
 // Log In
@@ -42,7 +42,7 @@ const signup = async (email, password) => {
 // Update User Information
 const updateUser = async (updates) => {
   try {
-    const authToken = getAuthToken();
+    const authToken = getAuthToken('accessToken');
     const response = await fetch(`${API_BASE_URL}/api/user/update`, {
       method: 'PUT',
       headers: {

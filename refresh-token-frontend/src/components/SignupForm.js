@@ -2,7 +2,7 @@ import { useState } from "react";
 import { TextField, Button } from '@mui/material';
 import LoginIcon from '@mui/icons-material/Login';
 import { signup } from '../api/user';
-import { setAuthToken } from "../api/localStorage";
+import { setAuthToken } from "../utils/localStorage";
 
 function SignupForm(props) {
   const [email, setEmail] = useState('');
@@ -21,8 +21,8 @@ function SignupForm(props) {
 
       // Assuming the API response includes an accessToken
       if (response.accessToken) {
-        setAuthToken(response.accessToken);
-        setAuthToken(response.refreshToken);
+        setAuthToken(accessToken, response.accessToken);
+        setAuthToken(refreshToken, response.refreshToken);
         // Redirect the user or update the UI to reflect the successful signup/login
         setShowAlert('success', 'Signup successful, user logged in.');
       } else {

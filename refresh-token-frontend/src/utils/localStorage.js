@@ -1,11 +1,11 @@
 // Helper function to get stored auth token
-const getAuthToken = () => localStorage.getItem('authToken');
+const getAuthToken = (tokenName) => localStorage.getItem(tokenName);
 
 
 // Store Auth Token
-const setAuthToken = (token) => {
+const setAuthToken = (tokenName, token) => {
   try {
-    localStorage.setItem('authToken', token);
+    localStorage.setItem(tokenName, token);
   } catch (error) {
     console.error('Error setting auth token:', error);
   }
@@ -13,5 +13,5 @@ const setAuthToken = (token) => {
 
 export {
   getAuthToken,
-  setAuthToken 
+  setAuthToken
 }
