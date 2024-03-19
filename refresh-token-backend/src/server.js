@@ -33,7 +33,7 @@ app.post('/api/signup', async (req, res) => {
     const accessToken = jwt.sign(
       { userId: newUser._id },
       JWT_SECRET,
-      { expiresIn: '1m' } // Expires in 15 minutes
+      { expiresIn: '15m' } // Expires in 15 minutes
     );
 
     // Create a refresh token
@@ -69,7 +69,7 @@ app.post('/api/login', async (req, res) => {
     }
 
     // Access token
-    const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1m' }); // Expires in 15 minutes
+    const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '15m' }); // Expires in 15 minutes
     // Refresh token
     const refreshToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' }); // Expires in 7 days
 
@@ -122,7 +122,7 @@ app.post('/api/refresh', async (req, res) => {
     }
 
     // Issue a new access token
-    const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1m' });
+    const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '15m' });
 
     // Issue a new refresh token
     const newRefreshToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' }); // Expires in 7 days
