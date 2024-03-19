@@ -1,29 +1,9 @@
 import * as React from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardActions, CardContent, Typography, Button, List, ListItem, ListItemText } from '@mui/material';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import { getUserInfo } from "../api/user";
 
 function UserInfoCard(props) {
-  const [userInfo, setUserInfo] = React.useState(null);
-  const { showAlert } = props;
-  const navigate = useNavigate();
-
-  React.useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const res = await getUserInfo();
-        console.log(res)
-        setUserInfo(res);
-      } catch (error) {
-        console.error('Failed to fetch user info:', error);
-        showAlert('error', 'Failed to fetch user info');
-        navigate('../login')
-      }
-    };
-
-    fetchUserInfo();
-  }, [navigate, showAlert]);
+  const { userInfo } = props;
 
   if (!userInfo) {
     return <div>Loading...</div>;
