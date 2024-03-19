@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TextField, Button } from '@mui/material';
+import { TextField, Button, Link } from '@mui/material';
 import LoginIcon from '@mui/icons-material/Login';
 import { signup } from '../api/user';
 import { setAuthToken } from "../utils/localStorage";
@@ -43,16 +43,28 @@ function SignupForm(props) {
       <TextField required fullWidth label="Email" value={email} onInput={e => setEmail(e.target.value)}></TextField>
       <TextField required fullWidth label="Password" value={password} onInput={e => setPassword(e.target.value)}></TextField>
       <TextField required fullWidth label="Re-enter Password" value={confirmPWD} onInput={e => setConfirmPWD(e.target.value)}></TextField>
-      <Button
-        type="submit"
-        variant="contained"
-        size="large"
-        fullWidth
-        startIcon={<LoginIcon />}
-        style={{"marginTop": "1rem"}}
-      >
-        Signup
-      </Button>
+      <div style={{'width': '100%', 'display': 'flex', 'flexDirection': 'column'}}>
+        <Button
+          type="submit"
+          variant="contained"
+          size="large"
+          fullWidth
+          startIcon={<LoginIcon />}
+          style={{"marginTop": "1rem"}}
+        >
+          Signup
+        </Button>
+        <span style={{"marginTop": "8px", 'textAlign': 'center'}}>
+          or&nbsp;
+          <Link
+            onClick={() => {
+              navigate("../login");
+            }}
+          >
+            Login
+          </Link>
+        </span>
+      </div>
     </form>
   )
 }
