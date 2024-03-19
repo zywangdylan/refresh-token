@@ -1,4 +1,5 @@
 import { getAuthToken } from '../utils/localStorage'
+import authFetch from '../utils/authFetch';
 const API_BASE_URL = 'http://localhost:8080'
 
 // Log In
@@ -39,15 +40,44 @@ const signup = async (email, password) => {
   }
 };
 
+const getUserInfo = async () => {
+  try {
+    const url = `${API_BASE_URL}/api/userInfo`;
+    const accessToken = getAuthToken('accessToken');
+
+    const options = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+    };
+
+    const response = await authFetch(url, options);
+
+    if (!response.ok) {
+      const error = new Error('Failed to fetch user info');
+      error.info = await response.json();
+      error.status = response.status;
+      throw error;
+    }
+
+    return response.json(); // Return the user info
+  } catch (error) {
+    console.error('Error fetching user info:', error);
+    throw error; // Rethrow the error so it can be handled by the caller
+  }
+};
+
 // Update User Information
 const updateUser = async (updates) => {
   try {
-    const authToken = getAuthToken('accessToken');
-    const response = await fetch(`${API_BASE_URL}/api/user/update`, {
+    const accessToken = getAuthToken('accessToken');
+    const response = await authFetch(`${API_BASE_URL}/api/userInfo`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`,
+        'Authorization': `Bearer ${accessToken}`,
       },
       body: JSON.stringify(updates),
     });
@@ -63,5 +93,6 @@ const updateUser = async (updates) => {
 export {
   login,
   signup,
+  getUserInfo,
   updateUser
 }

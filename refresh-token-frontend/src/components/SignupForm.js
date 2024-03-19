@@ -3,12 +3,14 @@ import { TextField, Button } from '@mui/material';
 import LoginIcon from '@mui/icons-material/Login';
 import { signup } from '../api/user';
 import { setAuthToken } from "../utils/localStorage";
+import { useNavigate } from "react-router-dom";
 
 function SignupForm(props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPWD, setConfirmPWD] = useState('');
 
+  const navigate = useNavigate();
   const { setShowAlert } = props;
 
   const handleSubmit = async (event) => {
@@ -21,10 +23,11 @@ function SignupForm(props) {
 
       // Assuming the API response includes an accessToken
       if (response.accessToken) {
-        setAuthToken(accessToken, response.accessToken);
-        setAuthToken(refreshToken, response.refreshToken);
-        // Redirect the user or update the UI to reflect the successful signup/login
+        setAuthToken('accessToken', response.accessToken);
+        setAuthToken('refreshToken', response.refreshToken);
+
         setShowAlert('success', 'Signup successful, user logged in.');
+        navigate('../home');
       } else {
         setShowAlert('warning', 'Signup successful, but no access token received.');
       }

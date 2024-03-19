@@ -1,6 +1,6 @@
 import { getAuthToken, setAuthToken } from './localStorage';
 
-const API_BASE_URL = 'http://localhost:3000'; // Adjust according to your server's address
+const API_BASE_URL = 'http://localhost:8080'; // Adjust according to your server's address
 let isRefreshing = false;
 let requests = [];
 
@@ -15,9 +15,10 @@ const processQueue = (error, token = null) => {
   requests = [];
 }
 
-async function refreshToken() {
+async function refresh() {
   // Assuming the refresh token is stored in localStorage
   const refreshToken = getAuthToken('refreshToken');
+
   try {
     const response = await fetch(`${API_BASE_URL}/api/refresh`, {
       method: 'POST',
@@ -26,6 +27,7 @@ async function refreshToken() {
       },
       body: JSON.stringify({ refreshToken }),
     });
+
     const data = await response.json();
     if (!response.ok) throw new Error(data.message || 'Could not refresh token');
 
@@ -36,53 +38,45 @@ async function refreshToken() {
     return data.accessToken;
   } catch (error) {
     console.error('Refresh Token Error:', error);
-    // TODO: Redirect to login page
     throw error;
-  } finally {
-    isRefreshing = false;
   }
 }
 
 async function authFetch(url, options) {
-  let res = await fetch(url, options);
-  let accessToken = getAuthToken('accessToken');
-
-  const executeFetch = async ()  => {
-    const res = await fetch(url, {
-      ...options,
-      'Authorization': `Bearer ${accessToken}`,
-    });
-    return res;
-  }
-
-  const response = await executeFetch();
-  const data = await response.json();
+  let response = await fetch(url, options);
 
   if (response.ok) {
     return response;
   } else if (response.status === 409) {
     if (!isRefreshing) {
       isRefreshing = true;
-      refreshToken.then(newToken => {
-        processQueue(null, newToken)
+      return refresh().then(newToken => {
+        const authOptions = {
+          ...options,
+          headers: {
+            ...options.headers,
+            'Authorization': `Bearer ${newToken}`, // Update the authorization header
+          },
+        };
+        return fetch(url, authOptions);
       }).catch(err => {
-        processQueue(error, null)
-        return Promise.reject(error)
-      })
-    }
-
-    return new Promise((resolve, reject) => {
-      failedQueue.push({
-        resolve: () => resolve(authFetch(url, options)),
-        reject: () => reject(data),
+        processQueue(err, null); // Process the queue with error
+        throw err; // Rethrow to be caught by the caller
+      }).finally(() => {
+        isRefreshing = false; // Reset the refreshing flag
       });
-    });
+    } else {
+      // If a refresh is already in progress, queue this request
+      return new Promise((resolve, reject) => {
+        requests.push({
+          resolve: () => resolve(authFetch(url, options)),
+          reject: () => reject,
+        });
+      });
+    }
   } else {
-    // Directly reject for all other errors
-    return Promise.reject(data);
+    throw new Error('Failed to fetch');
   }
-
-  return response;
 }
 
 export default authFetch;
