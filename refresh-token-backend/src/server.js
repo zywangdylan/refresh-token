@@ -33,7 +33,7 @@ app.post('/api/signup', async (req, res) => {
     const accessToken = jwt.sign(
       { userId: newUser._id },
       JWT_SECRET,
-      { expiresIn: '15m' } // Expires in 15 minutes
+      { expiresIn: '30s' } // Expires in 15 minutes
     );
 
     // Create a refresh token
@@ -69,7 +69,7 @@ app.post('/api/login', async (req, res) => {
     }
 
     // Access token
-    const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '15m' }); // Expires in 15 minutes
+    const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '30s' }); // Expires in 15 minutes
     // Refresh token
     const refreshToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' }); // Expires in 7 days
 
@@ -83,7 +83,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-app.post('/api/logout', async (req, res) => {
+app.post('/api/logout', authenticateToken, async (req, res) => {
   const { refreshToken } = req.body;
   try {
     const payload = jwt.verify(refreshToken, JWT_SECRET);
@@ -122,7 +122,7 @@ app.post('/api/refresh', async (req, res) => {
     }
 
     // Issue a new access token
-    const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '15m' });
+    const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '30s' });
 
     // Issue a new refresh token
     const newRefreshToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' }); // Expires in 7 days
@@ -131,6 +131,8 @@ app.post('/api/refresh', async (req, res) => {
     user.refreshTokens[tokenIndex] = { token: newRefreshToken };
 
     await user.save(); // Save the updated user document
+
+
 
     res.status(200).json({ accessToken, refreshToken: newRefreshToken });
   } catch (error) {
@@ -151,7 +153,7 @@ app.get('/api/userInfo', authenticateToken, async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'user not found' });
     }
-    console.log(user)
+
     res.status(200).json(user);
   } catch (error) {
     console.error(error);
