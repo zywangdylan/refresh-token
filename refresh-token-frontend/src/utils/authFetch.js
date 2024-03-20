@@ -1,6 +1,6 @@
 import { getAuthToken, setAuthToken } from './localStorage';
 
-const API_BASE_URL = 'http://localhost:8080'; // Adjust according to your server's address
+const API_BASE_URL = 'http://localhost:8080';
 let isRefreshing = false;
 let requests = [];
 
@@ -16,7 +16,6 @@ const processQueue = (error, token = null) => {
 }
 
 async function refresh() {
-  // Assuming the refresh token is stored in localStorage
   const refreshToken = getAuthToken('refreshToken');
 
   try {
@@ -80,14 +79,3 @@ async function authFetch(url, options) {
 }
 
 export default authFetch;
-
-// authFetch(API_URL + '/endpoint', {
-//   method: 'GET',
-//   // Additional options...
-// })
-// .then(data => {
-//   // Handle successful response
-// })
-// .catch(error => {
-//   // Handle error
-// });
