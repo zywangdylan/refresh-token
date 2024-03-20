@@ -15,6 +15,10 @@ const processQueue = (error, token = null) => {
   requests = [];
 }
 
+function delay(duration) {
+  return new Promise(resolve => setTimeout(resolve, duration));
+}
+
 async function refresh() {
   const refreshToken = getAuthToken('refreshToken');
 
@@ -57,6 +61,7 @@ async function authFetch(url, options) {
             'Authorization': `Bearer ${newToken}`, // Update the authorization header
           },
         };
+        processQueue(null, newToken);
         return fetch(url, authOptions);
       }).catch(err => {
         processQueue(err, null); // Process the queue with error
